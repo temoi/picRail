@@ -1,0 +1,13 @@
+unit LocoNetUnit;
+
+
+const
+   OPC_IDLE = 0x85;  //FORCE IDLE state, B'cast emerg. STOP
+   OPC_GPON = 0x83;  //GLOBAL power ON request
+   OPC_GPOFF = 0x82; //GLOBAL power OFF req
+   OPC_BUSY = 0x81;  //MASTER busy code, NUL
+
+
+implementation
+
+end.
