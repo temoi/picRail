@@ -1,13 +1,54 @@
 unit LocoNetUnit;
 
+{ Docs
+	http://wiki.rocrail.net/doku.php?id=loconet:lnpe-en
+}
 
 const
+//2 Byte Message Opcodes	
+//<OPC>,<CKSUM>
    OPC_IDLE = 0x85;  //FORCE IDLE state, B'cast emerg. STOP
    OPC_GPON = 0x83;  //GLOBAL power ON request
    OPC_GPOFF = 0x82; //GLOBAL power OFF req
    OPC_BUSY = 0x81;  //MASTER busy code, NUL
-
+//4 Byte Message Opcodes	
+//<OPC>,<ARG1>,<ARG2>,<CKSUM>
+   OPC_LOCO_ADR = 0xBF;		//Request loco address, if not found master puts address in a free slot.
+   OPC_SW_ACK = 0xBD;	//Request switch with acknoledge function.
+   OPC_SW_STATE = 0xBC;	//Request state of switch.
+   OPC_RQ_SL_DATA = 0xBB;	//Request slot data/status block
+   OPC_MOVE_SLOTS = 0xBA;	//Move slot SRC to DST
+   OPC_LINK_SLOTS = 0xB9;	//Link slot ARG1 to slot ARG2
+   OPC_UNLINK_SLOTS = 0xB8;	//Unlink slot ARG1 from slot ARG2
+   OPC_CONSIST_FUNC = 0xB6; //Set FUNC bits in a CONSIST uplink element
+   OPC_SLOT_STAT1 = 0xB5;	//Write slot stat1
+   OPC_LONG_ACK = 0xB4;	//Long acknowledge
+   OPC_INPUT_REP = 0xB2; //General sensor input codes
+   OPC_SW_REP = 0xB1;	//Turnout sensor state report
+   OPC_SW_REQ = 0xB0;	//Request switch function
+   OPC_LOCO_SND = 0xB0;	//Set slot sound function
+   OPC_LOCO_DIRF = 0xA1; //Set slot direction, function 0-4 state
+   OPC_LOCO_SPD =0xA0; //Set slot speed
+// 6 Byte Message Opcodes
+// <OPC>,<ARG1>,<ARG2>,<ARG3>,<ARG4>,<CKSUM>
+   OPC_MULTI_SENSE = 0xD0; //power management and transponding
+// Variable Byte Message Opcodes   	
+// <OPC>,<COUNT>,<ARG1>,<ARG2>,<ARG3>,...,<ARG(COUNT-3)>,<CKSUM>
+   OPC_WR_SL_DATA = 0xEF; //Write slot data.
+   OPC_WR_SL_DATA = 0xEF; //Write PT slot data.
+   OPC_SL_RD_DATA = 0xE7; //Slot data response.	
+   OPC_PEER_XFER = 0xE5;	//Move 8 bytes peer to peer, SRC->DST
+   OPC_LISSY_REP = 0xE4;	//Lissy IR report
+   OPC_IMM_PACKET =0xED; //Send n-byte packet immediate.;
+   
+   LNBufferLength = 15;  //Maks lengde på LocoNet buffer
+   LNBufferArr = Array(0..) of byte;
+	
 
 implementation
+
+function CalcOpcLength(aOpc:byte);
+begin
+end;
 
 end.
