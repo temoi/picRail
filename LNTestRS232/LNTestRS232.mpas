@@ -1,0 +1,129 @@
+{*
+ * Project name:
+     Lcd_Test (Demonstration of the LCD library routines)
+ * Copyright:
+     (c) Mikroelektronika, 2009.
+ * Revision History:
+     20080930:
+       - initial release;
+       - 20090720 - modified by Slavisa Zlatanovic;
+ * Description:
+     This code demonstrates how to use LCD 4-bit library. LCD is first
+     initialized, then some text is written, then the text is moved.
+ * Test configuration:
+     MCU:             PIC16F887
+                      http://ww1.microchip.com/downloads/en/DeviceDoc/41291F.pdf
+     Dev.Board:       EasyPIC6
+                      http://www.mikroe.com/en/tools/easypic6/
+     Oscillator:      HS, 08.0000 MHz
+     Ext. Modules:    Character LCD 2x16
+                      http://www.mikroe.com/en/tools/components/#other
+     SW:              mikroPascal PRO for PIC
+                      http://www.mikroe.com/en/compilers/mikropascal/pro/pic/
+ * NOTES:
+     - Turn on LCD backlight switch (SW8.7) on the development board.
+*}
+
+program LNTestRS232;
+
+{ Declarations section }
+
+uses LocoNetUnit;
+
+
+// LCD module connections
+var LCD_RS : sbit  at RB4_bit;
+var LCD_EN : sbit  at RB5_bit;
+var LCD_D4 : sbit  at RB0_bit;
+var LCD_D5 : sbit  at RB1_bit;
+var LCD_D6 : sbit  at RB2_bit;
+var LCD_D7 : sbit  at RB3_bit;
+
+var LCD_RS_Direction : sbit at TRISB4_bit;
+var LCD_EN_Direction : sbit at TRISB5_bit;
+var LCD_D4_Direction : sbit at TRISB0_bit;
+var LCD_D5_Direction : sbit at TRISB1_bit;
+var LCD_D6_Direction : sbit at TRISB2_bit;
+var LCD_D7_Direction : sbit at TRISB3_bit;
+// End LCD module connections
+
+var txt1 : array[16] of char;
+    txt2 : array[9]  of char;
+    txt3 : array[8]  of char;
+    txt4 : array[7]  of char;
+    txt60: array[60] of char;
+    i    : byte;                       // byte variable
+    j    : byte;
+
+procedure Move_Delay();                // Function used for text moving
+  begin
+    Delay_ms(500);                     // You can change the moving speed here
+  end;
+
+procedure interrupt;
+begin
+  if PIR1.RCIF = 1 then
+  begin
+    UsartReceiverInterrupt;      // <--- call the interrupt service routine
+    PIR1.RCIF := 0;
+  end;
+end;
+
+  begin
+
+    TRISB := 0;
+    PORTB := 0xFF;
+    TRISB := 0xFF;
+    ANSEL  := 0;                        // Configure AN pins as digital I/O
+    ANSELH := 0;
+
+    txt1 := 'mikroElektronika';
+    txt2 := 'EasyPIC6';
+    txt3 := 'Testing';
+    txt4 := 'Lokonet';
+    
+    UART1_Init(19200);              // Init Usart
+    //UsartReceiverInit;             // <--- initialization of the unit
+    Delay_ms(100);                            // Wait for UART module to stabilize
+
+
+  // Enable overall interrupts
+    //INTCON.GIE  := 1;               // enable interrupts (needed by the soft uart receiver)
+
+    Lcd_Init();                        // Initialize LCD
+    Lcd_Cmd(_LCD_CLEAR);               // Clear display
+    Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+    LCD_Out(1,6,txt3);                 // Write text in first row
+    LCD_Out(2,6,txt4);                 // Write text in second row
+    Delay_ms(2000);
+    Lcd_Cmd(_LCD_CLEAR);               // Clear display
+
+
+
+    while TRUE do                      // Endless loop
+    begin
+      if UART1_Data_Ready() <> 0 then Lcd_Cmd(_LCD_CLEAR);
+      j:=0;
+
+     txt60:='';
+     while (UART1_Data_Ready() <> 0) do     // If data is received,
+     begin
+       ByteToStr(j,txt3);
+       txt3:='DATA bytes:'+txt3;
+       LCD_Out(1,1,txt3);
+       I := UART1_Read();
+       byteToStr(i,txt4);
+       UART1_Write(I);
+       //txt60:=txt4+' '+txt60;
+
+       LCD_Out(2,((j mod 4)+1),txt4);
+       inc(j);
+
+     end;
+
+     //if Length(txt60)>0 then
+     //begin
+     //  LCD_Out(2,1,txt60);
+     //end;
+    end;
+  end.

@@ -1,0 +1,168 @@
+unit UsartReceiver;
+
+// P18Fxxxx version
+
+// D. Rosseel
+// Original: 17-08-2008
+// Latest update: 21-04-2009
+
+//uses Project_Globals; // The size of the receive buffer is defined there in "const UsartBuffSize = xxx":
+const UsartBuffSize=64;
+
+{ This unit receives Usart Data using the Usart hardware, interrupt based.
+  
+   A Usart receive buffer is implemented.
+
+  It is a replacement for "Usart_Read(var error : byte) : byte;" from the "Usart Library".
+  This unit provides the function "UsartCharPresent: boolean;" to find out if characters are received.
+
+  It assumes the routine "Usart_Init(const baud_rate : longint)" has been called in advance.
+  
+}
+
+// --------------------  interface -----------------------
+
+//var UsartBufferOverflow: boolean;
+// Indicates if a character was received while the UsartBuffer was full
+// Has to be set to "false" by the application that uses this unit
+
+var UsartBufferOverflow: boolean;
+
+procedure UsartReceiverInit;
+// Initialization of the UsartReceiver status
+
+function UsartCharPresent: boolean;
+// Returns "true" if at least one character is in the buffer (received but not yet read)
+
+function ReadUsartByte: byte;
+// Returns the next received character in the Usart buffer
+
+procedure UsartReceiverInterrupt;
+
+{
+  --------------------  Usage in a program ---------------
+
+Program xxx;
+...
+uses ..., UsartReceiver;         // <--- add the unit
+...
+var I: byte;
+...
+
+procedure interrupt;
+begin
+  if PIR1.RCIF = 1 then
+  begin
+    UsartReceiverInterrupt;      // <--- call the interrupt service routine
+    PIR1.RCIF := 0;
+  end;
+end;
+
+begin
+...
+  Usart_Init(2400);              // Init Usart
+  UsartReceiverInit;             // <--- initialization of the unit
+
+  // Enable overall interrupts
+  INTCON.GIE  := 1;               // enable interrupts (needed by the soft uart receiver)
+...
+
+repeat                 // main loop
+   ...
+   while UsartCharPresent do
+   begin
+     I := ReadUsartByte;
+     ... // do something with it...
+   end;
+   ...
+until false;
+
+end.
+}
+
+// ---------------------------------------------------------------------------
+
+{ For the UsartBuffer a "Queue" mechanism is used:
+
+    * The 2 pointers (WritePtr/ReadPtr) start at the same buffer address.
+
+    * A new element is placed at the current [WritePtr], and WritePtr is incremented (WritePtr++).
+      If it passes the buffer top address, it is 'folded back' to the lowest address.
+    * The buffer is "not empty" now (anymore).
+    * If WritePtr gets to be equal to ReadPtr after the WritePtr increment, the buffer is "full".
+
+    * When you want to get a element off the buffer, you read the [ReadPtr] position,
+      and the ReadPtr pointer gets incremented (ReadPtr++).
+      If it passes the top buffer address, is folded back to the lowest address.
+    * The buffer is "not full" now (anymore).
+    * If ReadPtr is equal WritePtr after the ReadPtr increment, the buffer is "empty".
+}
+
+implementation
+
+var UsartBuffer: array[UsartBuffSize] of byte;
+    UsartBuffWritePtr, UsartBuffReadPtr: word;
+    UsartBufferEmpty, UsartBufferFull: boolean;
+    UsartError: boolean;
+    UsartData: byte;
+
+procedure UsartReceiverInit;
+begin
+  UsartBuffWritePtr := 0;
+  UsartBuffReadPtr := 0;
+  UsartBufferEmpty := true;
+  UsartBufferFull := false;
+  UsartBufferOverflow := false;
+  PIR1.RCIF   := 0;    // clear interrupt flag
+  PIE1.RCIE   := 1;    // enable Usart interrupts
+  INTCON.PEIE := 1;    // enable peripheral interrupts
+end;
+
+function UsartCharPresent: boolean;
+begin
+  Result := false;
+  if (UsartBufferEmpty = false)
+  then Result := true;
+end;
+
+function ReadUsartByte: byte;
+begin
+  PIE1.RCIE := 0;                                                        // Disable Usart Interrupts
+  if UsartBufferEmpty = false then
+  begin
+    Result := UsartBuffer[UsartBuffReadPtr];
+    Inc(UsartBuffReadPtr);
+    if UsartBuffReadPtr = UsartBuffSize then UsartBuffReadPtr := 0;
+    UsartBufferFull := false;
+    UsartBufferEmpty := (UsartBuffReadPtr = UsartBuffWritePtr);
+  end;
+  PIE1.RCIE := 1;                                                        // Enable Usart Interrupts again
+end;
+
+procedure UsartReceiverInterrupt;
+begin
+  UsartError := false;
+  UsartData := RCREG;
+
+  if (RCSTA and %00000110) > 0 then
+  begin
+    RCSTA.Cren := 0;
+    RCSTA.Cren := 1;  // Restart Usart reception
+    UsartError := true;
+  end;
+
+  if UsartError = false then
+  begin
+    if UsartBufferFull = false then
+    begin
+      UsartBuffer[UsartBuffWritePtr] := UsartData;
+      Inc(UsartBuffWritePtr);
+      if UsartBuffWritePtr = UsartBuffSize then UsartBuffWritePtr := 0;
+      UsartBufferEmpty := false;
+      UsartBufferFull := (UsartBuffWritePtr = UsartBuffReadPtr);
+    end else UsartBufferOverflow := true;
+  end;
+
+end;
+
+end.
