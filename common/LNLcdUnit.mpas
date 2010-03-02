@@ -1,0 +1,40 @@
+unit LNLcdUnit;
+
+var
+  LNLcdLine1 :string[16];
+  LNLcdLine2 :string[16];
+
+procedure LNLcdInit;
+procedure LNLcdWrite;
+procedure LNLcdWriteLine(nLine:byte);
+
+implementation
+
+procedure LNLcdInit;
+begin
+  LNLcdLine1 := 'Testing';
+  LNLcdLine2 := 'Lokonet';
+  Lcd_Init();                        // Initialize LCD
+  Lcd_Cmd(_LCD_CLEAR);               // Clear display
+  Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+  LCD_Out(1,6,LNLcdLine1);                 // Write text in first row
+  LCD_Out(2,6,LNLcdLine2);                 // Write text in second row
+  Delay_ms(2000);
+  Lcd_Cmd(_LCD_CLEAR);               // Clear display
+end;
+
+procedure LNLcdWrite;
+begin
+   Lcd_Cmd(_LCD_CLEAR);
+   LNLcdWriteLine(1);
+   LNLcdWriteLine(2);
+end;
+
+procedure LNLcdWriteLine(nLine:byte);
+begin
+   if nLine=1 then
+     LCD_Out(1,1,LNLcdLine1)
+   else LCD_Out(2,1,LNLcdLine2);
+end;
+
+end.

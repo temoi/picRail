@@ -1,9 +1,10 @@
 unit LocoNetUnit;
 
+uses LNLcdUnit;
+
 { Docs
         http://wiki.rocrail.net/doku.php?id=loconet:lnpe-en
 }
-
 const
 //2 Byte Message Opcodes        
 //<OPC>,<CKSUM>
@@ -39,15 +40,72 @@ const
    OPC_LISSY_REP = 0xE4;        //Lissy IR report
    OPC_IMM_PACKET =0xED; //Send n-byte packet immediate.;
    
-   LNBufferLength = 15;  //Maks lengde på LocoNet buffer
+   LNBufferMaxLength = 14;  //Maks lengde på LocoNet buffer
 
-        
+var
+
+ LNBufferData : array[0..LNBufferMaxLength] of byte;
+ LNBufferIndex : byte;
+
+ procedure LNInit;
+ procedure LNClearBuffer;
+ procedure LNWriteBuffer(var value:byte);
+ procedure doLNFunction;
+
 
 implementation
 
+
+
+var
+   i:integer;
+
 function CalcOpcLength(aOpc:byte):byte;
 begin
-     result:=0;
+  result:=0;
+end;
+
+procedure LNWriteBuffer(var value:byte);
+begin
+   if LNBufferIndex>LNBufferMaxLength then
+   begin
+      //Todo Send feilmelding
+      LNClearBuffer;
+   end else
+   begin
+      if value=13 then
+      begin
+         doLNFunction;
+         LNClearBuffer;
+      end else
+      begin
+         LNBufferData[LNBufferIndex]:=value;
+         inc(LNBufferIndex);
+      end;
+   end;
+end;
+
+procedure LNClearBuffer;
+begin
+   LNInit;
+end;
+
+procedure LNInit;
+begin
+   LNBufferIndex:=0;
+   for i:=0 to LNBufferMaxLength do LNBufferData[i]:=0;
+end;
+
+procedure doLNFunction;
+begin
+   LNLcdLine1:='Data';
+   LNLcdLine2:='';
+   for i:=0 to LNBufferIndex do
+   begin
+     LNLcdLine2[i]:=LNBufferData[i];
+   end;
+   LNLcdLine2[LNBufferIndex+1]:=0;
+   //LNLcdWrite();
 end;
 
 end.

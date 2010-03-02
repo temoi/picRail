@@ -1,27 +1,46 @@
 main
-	__CS2S
 	UART1_Init
-	Lcd_Init
-		Delay_5500us
-		Delay_1us
-	Lcd_Cmd
-		Delay_1us
-		Delay_5500us
-		Delay_50us
-	Lcd_Out
+	LNLcdInit
+		Lcd_Init
+			Delay_5500us
+			Delay_1us
 		Lcd_Cmd
 			Delay_1us
 			Delay_5500us
 			Delay_50us
-		Lcd_Chr_CP
+		Lcd_Out
 			Lcd_Cmd
 				Delay_1us
 				Delay_5500us
 				Delay_50us
+			Lcd_Chr_CP
+				Lcd_Cmd
+					Delay_1us
+					Delay_5500us
+					Delay_50us
+	LNInit
 	UART1_Data_Ready
-	ByteToStr
-		Div_8x8_U
-	UART1_Read
-	UART1_Write
+	SendRS232DataToLocoNet
+		UART1_Data_Ready
+		UART1_Read
+		LNWriteBuffer
+			LNClearBuffer
+				LNInit
+			doLNFunction
+		LNLcdWrite
+			Lcd_Cmd
+				Delay_1us
+				Delay_5500us
+				Delay_50us
+			LNLcdWriteLine
+				Lcd_Out
+					Lcd_Cmd
+						Delay_1us
+						Delay_5500us
+						Delay_50us
+					Lcd_Chr_CP
+						Lcd_Cmd
+							Delay_1us
+							Delay_5500us
+							Delay_50us
 interrupt
-	UsartReceiverInterrupt

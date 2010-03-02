@@ -12,17 +12,20 @@ Value=0
 [EEPROM_DEFINITION]
 Value=
 [FILES]
-Count=2
+Count=3
 File0=LNTestRS232.mpas
-File1=..\common\UsartReceiver.mpas
+File1=..\common\LocoNetUnit.mpas
+File2=..\common\LNLcdUnit.mpas
 [BINARIES]
 Count=0
 [IMAGES]
 Count=0
 [OPENED_FILES]
-Count=2
+Count=4
 File0=LNTestRS232.mpas
-File1=..\common\UsartReceiver.mpas
+File1=..\common\LocoNetUnit.mpas
+File2=..\common\LNLcdUnit.mpas
+File3=..\..\..\..\Program Files (x86)\Mikroelektronika\mikroPascal PRO for PIC\Uses\P16\__Lib_Delays.mpas
 [OTHER_FILES]
 Count=0
 [SEARCH_PATH]
