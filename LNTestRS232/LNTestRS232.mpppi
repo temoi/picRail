@@ -6,7 +6,7 @@ Value=0
 [BUILD_TYPE]
 Value=0
 [ACTIVE_TAB]
-Value=LNTestRS232.mpas
+Value=LNLcdUnit.mpas
 [USE_EEPROM]
 Value=0
 [EEPROM_DEFINITION]

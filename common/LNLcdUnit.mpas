@@ -4,11 +4,15 @@ var
   LNLcdLine1 :string[16];
   LNLcdLine2 :string[16];
 
+
 procedure LNLcdInit;
 procedure LNLcdWrite;
 procedure LNLcdWriteLine(nLine:byte);
 
 implementation
+
+var
+ i:byte;
 
 procedure LNLcdInit;
 begin
@@ -26,15 +30,24 @@ end;
 procedure LNLcdWrite;
 begin
    Lcd_Cmd(_LCD_CLEAR);
-   LNLcdWriteLine(1);
-   LNLcdWriteLine(2);
+   for i:=Length(LNLcdLine1)+1 to 16 do LNLcdLine1[i]:=' ';
+     LCD_Out(1,1,LNLcdLine1);
+   for i:=Length(LNLcdLine2)+1 to 16 do LNLcdLine2[i]:=' ';
+        LCD_Out(2,1,LNLcdLine2);
 end;
 
 procedure LNLcdWriteLine(nLine:byte);
 begin
    if nLine=1 then
-     LCD_Out(1,1,LNLcdLine1)
-   else LCD_Out(2,1,LNLcdLine2);
+   begin
+     for i:=Length(LNLcdLine1)+1 to 16 do LNLcdLine1[i]:=' ';
+     LCD_Out(1,1,LNLcdLine1);
+   end
+   else
+   begin
+        for i:=Length(LNLcdLine2)+1 to 16 do LNLcdLine2[i]:=' ';
+        LCD_Out(2,1,LNLcdLine2);
+   end;
 end;
 
 end.

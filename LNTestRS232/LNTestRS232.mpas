@@ -73,7 +73,7 @@ begin
        //UART1_Write(I);
        //UART1_Write(65);
      end;
-     LNLcdWrite();
+     //LNLcdWrite();
 end;
 
 procedure interrupt;
@@ -95,7 +95,7 @@ end;
 
 
     
-    UART1_Init(19200);              // Init Usart
+    UART1_Init(16557);              // Init Usart
     //UsartReceiverInit;             // <--- initialization of the unit
     Delay_ms(100);                            // Wait for UART module to stabilize
 

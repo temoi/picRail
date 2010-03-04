@@ -24,15 +24,12 @@ main
 		UART1_Data_Ready
 		UART1_Read
 		LNWriteBuffer
-			LNClearBuffer
-				LNInit
-			doLNFunction
-		LNLcdWrite
-			Lcd_Cmd
-				Delay_1us
-				Delay_5500us
-				Delay_50us
-			LNLcdWriteLine
+			LNLcdWrite
+				Lcd_Cmd
+					Delay_1us
+					Delay_5500us
+					Delay_50us
+				Length
 				Lcd_Out
 					Lcd_Cmd
 						Delay_1us
@@ -43,4 +40,24 @@ main
 							Delay_1us
 							Delay_5500us
 							Delay_50us
+			LNClearBuffer
+				LNInit
+			doLNFunction
+				__CS2S
+				LNLcdWrite
+					Lcd_Cmd
+						Delay_1us
+						Delay_5500us
+						Delay_50us
+					Length
+					Lcd_Out
+						Lcd_Cmd
+							Delay_1us
+							Delay_5500us
+							Delay_50us
+						Lcd_Chr_CP
+							Lcd_Cmd
+								Delay_1us
+								Delay_5500us
+								Delay_50us
 interrupt

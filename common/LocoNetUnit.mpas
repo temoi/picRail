@@ -55,10 +55,8 @@ var
 
 implementation
 
-
-
 var
-   i:integer;
+ i:byte;
 
 function CalcOpcLength(aOpc:byte):byte;
 begin
@@ -67,9 +65,11 @@ end;
 
 procedure LNWriteBuffer(var value:byte);
 begin
+   if value=0 then exit;
    if LNBufferIndex>LNBufferMaxLength then
    begin
-      //Todo Send feilmelding
+      LNLcdLine1:='Out of buffer:(';
+      LNLcdWrite;
       LNClearBuffer;
    end else
    begin
@@ -98,14 +98,18 @@ end;
 
 procedure doLNFunction;
 begin
-   LNLcdLine1:='Data';
+   LNLcdLine1:='doLNFunction';
    LNLcdLine2:='';
+   
    for i:=0 to LNBufferIndex do
    begin
-     LNLcdLine2[i]:=LNBufferData[i];
+     //strappendsuf(char(LNBufferData[i]),LNLcdLine2);
+     LNLcdLine2:=LNLcdLine2+char(LNBufferData[i]);
    end;
-   LNLcdLine2[LNBufferIndex+1]:=0;
-   //LNLcdWrite();
+
+   //Lcd_Out(1,1,LNLcdLine1);
+   //Lcd_Out(2,1,LNLcdLine2);
+   LNLcdWrite();
 end;
 
 end.
